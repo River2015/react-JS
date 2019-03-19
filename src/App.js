@@ -5,46 +5,47 @@ import News from './components/news';
 import Comments from './components/comments';
 import "antd/dist/antd.css";
 import TextInput from "./components/textInput";
+import TextInputAuto from "./components/textInputAuto";
+import Form from "./components/form";
+// import newsData from './data/newsData';
 
-
-const  myNews = [
-    {
-        id: 1,
-        author: 'Саша Печкин',
-        text: 'В четверг, четвертого числа...',
-        bigText: 'в четыре с четвертью часа четыре чёрненьких чумазеньких чертёнка чертили чёрными чернилами чертёж.'
-    },
-    {
-        id: 2,
-        author: 'Просто Вася',
-        text: 'Считаю, что $ должен стоить 35 рублей!',
-        bigText: 'А евро 42!'
-    },
-    {
-        id: 3,
-        author: 'Гость',
-        text: 'Бесплатно. Скачать. Лучший сайт - http://localhost:3000',
-        bigText: 'На самом деле платно, просто нужно прочитать очень длинное лицензионное соглашение'
-    }
-    ,
-    {
-        id: 4,
-        author: 'SFR',
-        text: 'Самая последняя новость часа',
-        bigText: 'Мэриленд может стать первым американским штатом, где запретят использовать пищевые контейнеры и стаканы из пенопласта. Соответствующий законопроект сейчас обсуждают в сенате штата'
-    }
-];
 
 class App extends React.Component {
-  render() {
+    state = {
+        news : null,
+        isLoading: false,
+    }
+    handleAddNews = (data) => {
+        //console.log('я вызвана из Add, но имею доступ к this.state у App!'. this.state)
+        const nextNews = [data, ...this.state.news]
+        this.setState({news: nextNews})
+    }
+
+    componentDidMount() {
+        fetch('http://localhost:3000/data/newsData.json')
+            .then(response => {return response.json()})
+            .then(data => {
+                setTimeout(() => { // добавили задержку
+                    this.setState({ isLoading: false, news: data })
+                }, 3000) // в три секунды
+            })
+    }
+
+    render(){
+        const {news, isLoading} = this.state;
     return (
         <div className="title">
+            <div className="block-input">
+                <TextInput/>
+                <TextInputAuto/>
+            </div>
+            <Form onAddNews={this.handleAddNews}/>
             <p>Новости</p>
-            <TextInput/>
-            <News data = {myNews}/>
+            {isLoading && <p>анрузаю...</p>}
+            {Array.isArray(news) && <News data={news}/>}
             <Comments/>
         </div>
-    );
+    )
   }
 }
 
